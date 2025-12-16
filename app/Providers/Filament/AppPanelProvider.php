@@ -4,13 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\App\Pages;
 use App\Filament\App\Pages\EditProfile;
-use App\Http\Middleware\TeamsPermission;
-use App\Listeners\CreatePersonalTeam;
-use App\Listeners\SwitchTeam;
 use App\Models\Team;
-use Filament\Events\Auth\Registered;
-use Filament\Events\TenantSet;
-use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -26,7 +20,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Event;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -57,7 +50,7 @@ class AppPanelProvider extends PanelProvider
                         ? url(EditProfile::getUrl())
                         : url($panel->getPath())),
             ])
-            ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
             ->pages([
                 Dashboard::class,
@@ -81,7 +74,6 @@ class AppPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                TeamsPermission::class,
             ]);
 
         // if (Features::hasApiFeatures()) {
@@ -124,26 +116,10 @@ class AppPanelProvider extends PanelProvider
          * Disable Jetstream routes.
          */
         Jetstream::$registersRoutes = false;
-
-        /**
-         * Listen and create personal team for new accounts.
-         */
-        Event::listen(
-            Registered::class,
-            CreatePersonalTeam::class,
-        );
-
-        /**
-         * Listen and switch team if tenant was changed.
-         */
-        Event::listen(
-            TenantSet::class,
-            SwitchTeam::class,
-        );
     }
 
     public function shouldRegisterMenuItem(): bool
     {
-        return true; //auth()->user()?->hasVerifiedEmail() && Filament::hasTenancy() && Filament::getTenant();
+        return true;
     }
 }

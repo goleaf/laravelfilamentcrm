@@ -1,0 +1,3 @@
+Analyze Laravel routes and controllers.
+Write result to docs/routes.md
+

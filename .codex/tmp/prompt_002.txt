@@ -1,0 +1,3 @@
+Analyze database queries and indexes.
+Write result to docs/db.md
+
