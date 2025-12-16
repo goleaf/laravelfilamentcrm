@@ -22,6 +22,15 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    // #region agent log
+    public static function canViewAny(): bool
+    {
+        $canView = parent::canViewAny();
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'C', 'location' => 'UserResource.php:27', 'message' => 'canViewAny called', 'data' => ['resource' => 'UserResource', 'canView' => $canView, 'user' => auth()->user()?->email]], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        return $canView;
+    }
+    // #endregion
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -53,9 +62,6 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('roles.name')
-                    ->badge()
-                    ->separator(','),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable()
@@ -70,9 +76,6 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('roles')
-                    ->relationship('roles', 'name')
-                    ->multiple(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -101,4 +104,5 @@ class UserResource extends Resource
         ];
     }
 }
+
 

@@ -26,6 +26,10 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // #region agent log
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'D', 'location' => 'AdminPanelProvider.php:27', 'message' => 'Panel registration started', 'data' => ['panelId' => 'admin']], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        // #endregion
+        
         $panel
             ->default()
             ->id('admin')
@@ -36,12 +40,33 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Gray,
-            ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ]);
+        
+        // #region agent log
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'A', 'location' => 'AdminPanelProvider.php:43', 'message' => 'Before widget discovery', 'data' => ['widgetPath' => app_path('Filament/Admin/Widgets/Home'), 'exists' => is_dir(app_path('Filament/Admin/Widgets/Home'))]], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        // #endregion
+        
+        // #region agent log
+        $resourcesPath1 = app_path('Filament/Resources');
+        $resourcesPath2 = app_path('Filament/Admin/Resources');
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'B', 'location' => 'AdminPanelProvider.php:45', 'message' => 'Resource discovery paths', 'data' => ['path1' => $resourcesPath1, 'exists1' => is_dir($resourcesPath1), 'path2' => $resourcesPath2, 'exists2' => is_dir($resourcesPath2)]], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        // #endregion
+        
+        $panel->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
-            ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
-            ->discoverWidgets(in: app_path('Filament/Admin/Widgets/Home'), for: 'App\\Filament\\Admin\\Widgets\\Home')
-            ->pages([
+            ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages');
+            
+        // Only discover widgets if directory exists
+        $widgetsPath = app_path('Filament/Admin/Widgets/Home');
+        if (is_dir($widgetsPath)) {
+            $panel->discoverWidgets(in: $widgetsPath, for: 'App\\Filament\\Admin\\Widgets\\Home');
+        }
+        
+        // #region agent log
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'A', 'location' => 'AdminPanelProvider.php:56', 'message' => 'Widget discovery handled', 'data' => ['widgetDirExists' => is_dir($widgetsPath)]], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        // #endregion
+        
+        $panel->pages([
                 FilamentPage\Dashboard::class,
                 EditProfile::class,
                 // Pages\ApiTokenManagerPage::class,
@@ -75,6 +100,10 @@ class AdminPanelProvider extends PanelProvider
         //     ]);
         // }
 
+        // #region agent log
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'D', 'location' => 'AdminPanelProvider.php:103', 'message' => 'Panel registration completed', 'data' => ['panelId' => 'admin']], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        // #endregion
+        
         return $panel;
     }
 

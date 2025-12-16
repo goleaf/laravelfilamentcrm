@@ -23,6 +23,16 @@ class CompanyResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    // #region agent log
+    public static function canViewAny(): bool
+    {
+        $canView = parent::canViewAny();
+        $tenant = Filament::getTenant();
+        file_put_contents('/www/wwwroot/filamentsocialnetwork.prus.dev/.cursor/debug.log', json_encode(['sessionId' => 'debug-session', 'runId' => 'run1', 'hypothesisId' => 'B', 'location' => 'CompanyResource.php:27', 'message' => 'canViewAny called', 'data' => ['resource' => 'CompanyResource', 'canView' => $canView, 'tenant' => $tenant?->id, 'user' => auth()->user()?->email]], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND);
+        return $canView;
+    }
+    // #endregion
+
     public static function form(Schema $schema): Schema
     {
         return $schema

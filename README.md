@@ -1,32 +1,27 @@
 # Laravel Filament CRM
 
-A comprehensive Customer Relationship Management (CRM) system built with Laravel and Filament, designed to help businesses manage their customer relationships, sales pipeline, and business operations efficiently.
+A comprehensive Customer Relationship Management (CRM) system built with Laravel and Filament.
 
 ## Features
 
+### Core CRM Functionality
+- **Company Management**: Complete company profile management with contact information, addresses, and notes
+- **Contact Management**: Detailed contact management system with company associations
+- **Deal Pipeline**: Sales pipeline management with stages, statuses, and deal tracking
+- **Activity Tracking**: Comprehensive activity logging for companies, contacts, and deals
+- **Team-Based Multi-Tenancy**: Multi-tenant architecture with team isolation
+
 ### User Management
-- **Role-Based Access Control**: Admin and User roles with granular permissions
-- **User Profiles**: Comprehensive user profile management with customizable fields
-- **Team Management**: Multi-tenant support with team-based organization
-- **Authentication**: Secure authentication system with email verification
-
-### Content Management
-- **Posts**: Create, edit, and manage posts with rich content support
-- **Comments**: Interactive commenting system for posts
-- **Likes**: Social engagement features with like functionality
-- **Media Support**: Image and media upload capabilities
-
-### Social Features
-- **Friendships**: User connection and friendship management system
-- **Messaging**: Direct messaging between users
-- **User Profiles**: Extended profile information with personal details
+- **Dual Panel System**: Separate admin and user interfaces
+- **Admin Panel**: Full administrative control with complete resource management
+- **User Panel**: User-friendly interface for managing personal CRM data
+- **Team Management**: Multi-team support with personal and shared teams
 
 ### Administrative Features
-- **Admin Panel**: Comprehensive admin interface built with Filament
-- **User Panel**: User-friendly interface for end users
-- **Menu Management**: Dynamic menu system with hierarchical structure
-- **Site Settings**: Centralized configuration and settings management
-- **Module System**: Extensible modular architecture for custom features
+- **User Administration**: Complete user management system
+- **Team Administration**: Team creation and management
+- **Data Isolation**: Team-based data separation and security
+- **Profile Management**: User profile customization
 
 ### Technical Features
 - **Laravel Framework**: Built on Laravel with modern PHP practices
@@ -34,7 +29,6 @@ A comprehensive Customer Relationship Management (CRM) system built with Laravel
 - **Database Seeding**: Comprehensive seeders for development and testing
 - **Factory Support**: Model factories for all entities
 - **Multi-Tenancy**: Team-based multi-tenant architecture
-- **API Ready**: RESTful API support for integrations
 
 ## Requirements
 
@@ -127,6 +121,7 @@ The application follows a modular architecture:
 - `app/Models/` - Eloquent models
 - `app/Filament/Admin/` - Admin panel resources and pages
 - `app/Filament/App/` - User panel resources and pages
+- `app/Filament/Resources/` - Shared resources accessible from both panels
 - `database/factories/` - Model factories for testing
 - `database/seeders/` - Database seeders
 - `routes/` - Application routes

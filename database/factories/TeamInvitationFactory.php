@@ -28,3 +28,4 @@ class TeamInvitationFactory extends Factory
     }
 }
 
+

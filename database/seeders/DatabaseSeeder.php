@@ -2,21 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Comment;
-use App\Models\Friendship;
-use App\Models\Like;
+use App\Models\Activity;
+use App\Models\Company;
+use App\Models\Contact;
+use App\Models\Deal;
 use App\Models\Menu;
-use App\Models\Message;
-use App\Models\Post;
-use App\Models\Profile;
 use App\Models\SiteSettings;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Prompts\Exceptions\NonInteractiveValidationException;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,71 +20,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Generate permissions using Filament Shield
-        $this->generatePermissions();
-
-        // Create roles
-        $this->createRoles();
-
-        // Create users
-        $this->createUsers();
-
-        // Create menus
-        $this->createMenus();
-
-        // Create site settings
-        $this->createSiteSettings();
-
-        // Create posts, comments, likes, profiles, friendships, messages
-        $this->createSocialData();
-    }
-
-    /**
-     * Generate permissions using Filament Shield
-     */
-    protected function generatePermissions(): void
-    {
-        try {
-            Artisan::call('shield:generate', [
-                '--all' => true,
-                '-n' => true,
-            ]);
-            $this->command->info('Permissions generated successfully.');
-        } catch (NonInteractiveValidationException $e) {
-            $this->command->warn('Skipping permission generation. Run "php artisan shield:generate --all" manually to generate permissions.');
-        }
-    }
-
-    /**
-     * Create roles and assign permissions
-     */
-    protected function createRoles(): void
-    {
-        // Create admin role
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $permissions = Permission::where('guard_name', 'web')->pluck('id')->toArray();
-        $adminRole->syncPermissions($permissions);
-        $this->command->info('Admin role created with all permissions.');
-
-        // Create user role
-        $userRole = Role::firstOrCreate(['name' => 'user']);
-        $userPermissions = Permission::where('guard_name', 'web')->pluck('id')->toArray();
-        $userRole->syncPermissions($userPermissions);
-        $this->command->info('User role created with permissions.');
-    }
-
-    /**
-     * Create users with roles
-     */
-    protected function createUsers(): void
-    {
         // Create admin user
         $adminUser = User::factory()->withPersonalTeam()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
         ]);
-        $adminUser->assignRole('admin');
         $this->command->info('Admin user created: admin@example.com / password');
 
         // Create regular user
@@ -98,21 +34,89 @@ class DatabaseSeeder extends Seeder
             'email' => 'user@example.com',
             'password' => Hash::make('password'),
         ]);
-        $regularUser->assignRole('user');
         $this->command->info('Regular user created: user@example.com / password');
 
         // Create additional users
-        User::factory(10)->withPersonalTeam()->create()->each(function ($user) {
-            $user->assignRole('user');
-        });
+        $users = User::factory(10)->withPersonalTeam()->create();
         $this->command->info('10 additional users created.');
-    }
 
-    /**
-     * Create menu items
-     */
-    protected function createMenus(): void
-    {
+        // Get all teams for seeding related data
+        $teams = Team::all();
+
+        // Create companies for each team
+        foreach ($teams as $team) {
+            Company::factory(rand(5, 10))->create([
+                'team_id' => $team->id,
+            ]);
+        }
+        $this->command->info('Companies created for all teams.');
+
+        // Create contacts for each team
+        foreach ($teams as $team) {
+            $teamCompanies = Company::where('team_id', $team->id)->get();
+            
+            Contact::factory(rand(10, 20))->create([
+                'team_id' => $team->id,
+                'company_id' => $teamCompanies->random()->id ?? null,
+            ]);
+        }
+        $this->command->info('Contacts created for all teams.');
+
+        // Create deals for each team
+        foreach ($teams as $team) {
+            $teamCompanies = Company::where('team_id', $team->id)->get();
+            $teamContacts = Contact::where('team_id', $team->id)->get();
+            $teamUsers = $team->allUsers();
+
+            Deal::factory(rand(5, 15))->create([
+                'team_id' => $team->id,
+                'company_id' => $teamCompanies->random()->id ?? null,
+                'contact_id' => $teamContacts->random()->id ?? null,
+                'owner_id' => $teamUsers->random()->id ?? $adminUser->id,
+            ]);
+        }
+        $this->command->info('Deals created for all teams.');
+
+        // Create activities for each team
+        foreach ($teams as $team) {
+            $teamCompanies = Company::where('team_id', $team->id)->get();
+            $teamContacts = Contact::where('team_id', $team->id)->get();
+            $teamDeals = Deal::where('team_id', $team->id)->get();
+            $teamUsers = $team->allUsers();
+
+            // Create activities for companies
+            foreach ($teamCompanies->take(5) as $company) {
+                Activity::factory(rand(2, 5))->create([
+                    'team_id' => $team->id,
+                    'user_id' => $teamUsers->random()->id ?? $adminUser->id,
+                    'subject_type' => Company::class,
+                    'subject_id' => $company->id,
+                ]);
+            }
+
+            // Create activities for contacts
+            foreach ($teamContacts->take(10) as $contact) {
+                Activity::factory(rand(1, 3))->create([
+                    'team_id' => $team->id,
+                    'user_id' => $teamUsers->random()->id ?? $adminUser->id,
+                    'subject_type' => Contact::class,
+                    'subject_id' => $contact->id,
+                ]);
+            }
+
+            // Create activities for deals
+            foreach ($teamDeals->take(8) as $deal) {
+                Activity::factory(rand(2, 4))->create([
+                    'team_id' => $team->id,
+                    'user_id' => $teamUsers->random()->id ?? $adminUser->id,
+                    'subject_type' => Deal::class,
+                    'subject_id' => $deal->id,
+                ]);
+            }
+        }
+        $this->command->info('Activities created for all teams.');
+
+        // Create menu items
         $menus = [
             [
                 'name' => 'Home',
@@ -159,6 +163,18 @@ class DatabaseSeeder extends Seeder
             $this->createMenu($menuData);
         }
         $this->command->info('Menu items created.');
+
+        // Create site settings
+        SiteSettings::factory()->create([
+            'name' => config('app.name', 'Laravel Filament CRM'),
+            'currency' => '$',
+            'default_language' => 'en',
+            'email' => 'info@example.com',
+            'phone_01' => '+1 234 567 8900',
+            'address' => '123 Main St, City, State 12345',
+            'country' => 'United States',
+        ]);
+        $this->command->info('Site settings created.');
     }
 
     /**
@@ -175,74 +191,5 @@ class DatabaseSeeder extends Seeder
         foreach ($children as $childData) {
             $this->createMenu($childData, $menu->id);
         }
-    }
-
-    /**
-     * Create site settings
-     */
-    protected function createSiteSettings(): void
-    {
-        SiteSettings::factory()->create([
-            'name' => config('app.name', 'Laravel Filament CRM'),
-            'currency' => '$',
-            'default_language' => 'en',
-            'email' => 'info@example.com',
-            'phone_01' => '+1 234 567 8900',
-            'address' => '123 Main St, City, State 12345',
-            'country' => 'United States',
-        ]);
-        $this->command->info('Site settings created.');
-    }
-
-    /**
-     * Create social data (posts, comments, likes, profiles, friendships, messages)
-     */
-    protected function createSocialData(): void
-    {
-        // Create profiles for existing users
-        User::all()->each(function ($user) {
-            Profile::factory()->create(['user_id' => $user->id]);
-        });
-        $this->command->info('Profiles created for all users.');
-
-        // Create posts
-        $posts = Post::factory(20)->create();
-        $this->command->info('20 posts created.');
-
-        // Create comments for posts
-        $posts->each(function ($post) {
-            Comment::factory(rand(2, 5))->create(['post_id' => $post->id]);
-        });
-        $this->command->info('Comments created for posts.');
-
-        // Create likes for posts
-        $posts->each(function ($post) {
-            Like::factory(rand(1, 10))->create(['post_id' => $post->id]);
-        });
-        $this->command->info('Likes created for posts.');
-
-        // Create friendships
-        $users = User::all();
-        foreach ($users->take(5) as $requester) {
-            foreach ($users->where('id', '!=', $requester->id)->take(3) as $addressee) {
-                Friendship::factory()->create([
-                    'requester_id' => $requester->id,
-                    'addressee_id' => $addressee->id,
-                    'status' => fake()->randomElement(['pending', 'accepted', 'declined']),
-                ]);
-            }
-        }
-        $this->command->info('Friendships created.');
-
-        // Create messages
-        foreach ($users->take(5) as $sender) {
-            foreach ($users->where('id', '!=', $sender->id)->take(2) as $receiver) {
-                Message::factory(rand(1, 3))->create([
-                    'sender_id' => $sender->id,
-                    'receiver_id' => $receiver->id,
-                ]);
-            }
-        }
-        $this->command->info('Messages created.');
     }
 }

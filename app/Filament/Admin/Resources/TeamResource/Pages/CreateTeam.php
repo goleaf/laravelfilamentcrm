@@ -10,3 +10,4 @@ class CreateTeam extends CreateRecord
     protected static string $resource = TeamResource::class;
 }
 
+

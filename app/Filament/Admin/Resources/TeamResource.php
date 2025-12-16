@@ -97,3 +97,4 @@ class TeamResource extends Resource
     }
 }
 
+
